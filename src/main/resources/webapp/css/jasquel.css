@@ -1,0 +1,61 @@
+.jasquel-logo {
+    background: url(../img/logo-monochrome.png) no-repeat center;
+    background-size: contain;
+    width: 48px;
+    margin-right: 8px;
+}
+
+.jasquel-title {
+    color: #ffffff;
+    font-weight: bold;
+    margin-right: 8px;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 18px;
+    text-align: end;
+    padding-top: 6px;
+}
+
+.jasquel-title>.version {
+    font-size: 11px;
+}
+
+.sidebar {
+    min-width: 300px;
+}
+
+.sidebar-toggle {
+     font-size: 24px;
+     color: #ffffff
+}
+
+.file-tree {
+    overflow: auto;
+}
+
+.environment-select {
+    color: #555555;
+    font-weight: bold;
+}
+
+.watch-dialog {
+    width: 320px;
+    height: 160px;
+}
+
+.run-dialog {
+    width: 320px;
+    height: 160px;
+}
+
+/* jsTree custom */
+
+.jstree-container-ul {
+    display: table;
+    width: 100%;
+}
+
+.jstree-default .jstree-anchor {
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 14px;
+}
+

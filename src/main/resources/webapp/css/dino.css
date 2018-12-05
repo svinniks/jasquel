@@ -1,0 +1,343 @@
+.application {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    position: relative;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 14px;
+}
+
+.modal-background {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.3);
+}
+
+.modal-wrapper {
+    position: absolute;
+    display: inline-block;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30%);
+}
+
+.content {
+    margin: 0px;
+    padding: 0px;
+}
+
+.control {
+    box-sizing: border-box;
+    position: relative;
+}
+
+.dock-center-row {
+    flex-grow: 1;
+    flex-shrink: 1;
+    position: relative;
+    /*width: 0px;*/
+}
+
+.dock-center-column {
+    flex-grow: 1;
+    flex-shrink: 1;
+    height: 0px;
+    position: relative;
+}
+
+.resize-bar-row-left, .resize-bar-row-right {
+    position: absolute;
+    top: 0px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+}
+
+.resize-bar-column-top, .resize-bar-column-bottom {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    cursor: row-resize;
+    z-index: 2;
+}
+
+/* FeedLayout options ---------------------------------------- */
+
+.feed-layout-content-outer {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-y: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.feed-layout-content-inner {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    top: 0px;
+}
+
+.feed-layout-scroll-panel {
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative
+}
+
+.feed-layout-scroll-content {
+    position: absolute;
+    width: 1px;
+    height: 100%;
+}
+
+/* Panel */
+
+.panel {
+    border: dashed 1px #aaaaaa;
+}
+
+/* ScrollPanel */
+
+.panel .scroll-content {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    overflow: auto;
+}
+
+/* TabPages -------------------------------------- */
+
+/* The main element of TabPages */
+.tab-pages {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container fot the tabs */
+.tab-pages-tabs {
+    flex-grow: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+    background: transparent;
+}
+
+/* Element for one single tab */
+.tab-pages-tab {
+    flex-grow: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* Default visual attributes */
+    background-color: #eeeeee;
+    border: dashed 1px #aaaaaa;
+    margin-bottom: -1px;
+}
+
+/* Applied to the active tab */
+.tab-pages-tab-active {
+    background-color: #ffffff;
+    border-bottom: solid 1px #ffffff;
+}
+
+/* This class will be applied to the first (left-most) tab. */
+.tab-pages-tab-first {
+    /* Default visual attributes */
+    margin-left: 8px
+}
+
+/* This class will be applied to all other tabs. */
+.tab-pages-tab-next {
+    /* Default visual attributes */
+    margin-left: 8px;
+}
+
+/* Applied to the anchor in the tab (caption element) */
+.tab-pages-tab .caption {
+    font: inherit;
+    color: inherit;
+    text-decoration: inherit;
+    padding: 4px 24px 4px 0px;
+    display: inline-block; 
+}
+
+/* Applied to the icon span in the tab. */
+.tab-pages-tab .icon {
+    padding: 0px 4px 0px 18px;
+    display: inline-block; 
+}
+
+/* Tab close icon when NOT hover. */
+.tab-pages-tab .close-icon {
+    visibility: hidden;
+    margin-left: -12px;
+    margin-right: 6px;
+}
+
+/* Tab close icon with mouse over the tab. */
+.tab-pages-tab:hover .close-icon {
+    visibility: visible;
+}
+
+/* The main container for all tab pages */
+.tab-pages-details {
+    height: 0px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    /* Default visual attributes */
+    border: dashed 1px #aaaaaa;
+}
+
+.tab-pages-page {
+    width: 100%;
+    height: 100%;
+}
+
+/* Toolbar ------------------------------------------- */
+
+.toolbar {
+    padding: 2px;
+    /* Default visual attributes */
+    border: dashed 1px #aaaaaa;
+    background-color: #eeeeee;
+    padding: 2px;
+}
+
+/* Splitter is a vertical line in the toolbar */
+.splitter {
+    background: transparent;
+    margin: 2px;
+    padding-right: 2px;
+    border-left: solid 2px #aaaaaa;
+}
+
+/* IconButton centering magical workaround */
+.icon-button {
+    text-align: center;
+}
+
+.icon-button:before {
+    content:'';
+    height: 100%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon-button-center {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon-button-icon {
+    cursor: pointer;
+}
+
+/* Button options */
+
+.button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 9px;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    min-height: -webkit-min-content;
+}
+
+.button-icon+.button-caption {
+    margin-left: 4px;
+}
+
+/* ToggleButton default options */
+
+.toggle-button-on {
+    font-weight: bold;
+}
+
+/* Workaround to get the tex in the center */
+
+.caption {
+    display: inline-block;
+    align-self: center;
+    white-space: nowrap;
+    text-align: center;
+    padding: 0px 4px;
+}
+
+/* ProgressBar */
+
+.progress-bar {
+    border: dashed 1px #aaaaaa;
+    position: relative;
+    margin: 0px 4px;
+}
+
+.progress-bar .progress {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: #dddddd;
+}
+
+/* Dialogs */
+
+.dialog {
+    padding: 4px;
+}
+
+.dialog .button-panel {
+    padding: 4px;
+}
+
+/* Select */
+
+.select {
+    border: dashed 1px #aaaaaa;    
+    padding: 4px 8px;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+.select .selection {
+    margin-right: 6px;
+}
+
+.select .selector {
+    display: none;
+    position: absolute;
+    min-width: 100%;
+    z-index: 1;
+    background-color: #ffffff;
+    margin-top: 4px;
+    margin-left: -9px;
+    border: dashed 1px #aaaaaa;
+    padding: 4px 0px;
+}
+
+.select.active .selector {
+    display: block;
+}
+
+.select .option {
+    padding: 4px 8px;
+}
+
+.select .option:hover {
+    background-color: #dddddd;
+}

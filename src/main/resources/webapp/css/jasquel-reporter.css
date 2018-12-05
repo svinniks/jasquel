@@ -1,0 +1,406 @@
+.fa-fw {
+    width: 1em;
+}
+
+.detail-panel {
+    padding: 8px;
+}
+
+.unit-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.unit-summary {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* ScriptPanel ----------------------------------------------- */
+
+.script-panel {
+    margin-top: 6px;
+
+    /* TEMORARY */
+    /*border: solid 4px;
+    padding-bottom: 4px;
+    margin-bottom: 4px;*/
+}
+
+.script-panel .script-details {
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 14px;
+    padding: 0px 8px;
+}
+
+.script-panel .script-spacer {
+    height: 6px;
+    margin-right: 8px;
+    border-top: solid 1px #aaaaaa;
+}
+
+.script-panel.fail .script-details {
+    border-left: solid 4px #ffd0d0;
+    padding-left: 4px;
+}
+
+.script-panel:nth-child(1) .script-spacer {
+    border-top-width: 0px;
+    height: 2px;
+}
+
+.script-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    direction: rtl;
+    text-align: left;
+    margin-left: 8px;
+}
+
+/*.script-icon {
+    color: #454545;
+}*/
+
+.script-test-count {
+    min-width: 48px;
+    text-align: end;
+    padding: 2px 4px;
+    font-weight: bold;
+    border-radius: 4px;
+    margin: -6px 0px -6px 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    z-index: 1;
+}
+
+.script-test-count.pass {
+    background-color: #f0f8eb;
+    color: #006600;
+}
+
+.script-test-count.fail {
+    background-color: #ffd0d0;
+    color: #880000;
+}
+
+.script-duration {
+    width: 76px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    text-align: end;
+    margin-right: 8px;
+}
+
+.script-spinner {
+    background: url(../img/spinner.gif) no-repeat center;
+    background-size: contain;
+    height: 16px;
+}
+
+.script-panel.fail>.script-details>.unit-summary {
+    color: #880000;
+}
+
+/* SuitePanel ---------------------------------------------- */
+
+.suite-panel {
+    margin-left: 28px;
+    margin-top: 4px;
+    padding-left: 4px;
+}
+
+.suite-name {
+    margin-left: 8px;
+}
+
+.suite-panel.fail {
+    border-left: solid 4px #ffd0d0;
+    margin-left: 24px;
+}
+
+.suite-panel.fail>.unit-summary {
+    color: #880000;
+}
+
+.suite-test-count {
+    min-width: 48px;
+    text-align: end;
+    padding: 2px 4px;
+    margin-left: 8px;
+    font-weight: normal;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.suite-test-count.pass {
+    color: #669966;
+}
+
+.suite-test-count.fail {
+    color: #aa6666;
+}
+
+.suite-duration {
+    color: #888888;
+    width: 76px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    text-align: end;
+    margin-right: 8px;
+}
+
+.info-panel+.suite-panel {
+    margin-top: 0px;
+}
+
+/* TestPanel ------------------------------------------------ */
+
+.test-panel {
+    margin-left: 24px;
+    padding: 2px 8px 4px 10px;
+    background-color: #f0f8eb;
+    border-top: solid 1px #aaccaa;
+}
+
+.test-panel.fail {
+    background-color: #ffd0d0;
+    border-top: solid 1px #dd8888;
+}
+
+.test-panel.fail+.test-panel {
+    border-top: solid 1px #dd8888;
+}
+
+.unit-summary+.test-panel,
+.suite-panel+.test-panel {
+    margin-top: 8px;
+    border-top-width: 0px;
+    padding-top: 4px;
+}
+
+.test-icon {
+    font-size: 12px;
+}
+
+.test-panel>.unit-summary {
+    color: #006600;
+}
+
+.test-panel.fail>.unit-summary {
+    color: #880000;   
+}
+
+.test-name {
+    margin-left: 8px;
+}
+
+.test-duration {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.test-spinner {
+    background: url(../img/spinner.gif) no-repeat center;
+    background-size: contain;
+    height: 16px;
+    width: 16px;
+    margin-right: 2px;
+}
+
+/* ErrorPanel -------------------------------------------------- */
+
+.suite-panel>.error-panel,
+.script-panel .error-panel {
+    margin-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 2px;
+    color: #880000;
+    font-weight: bold;
+}
+
+.test-panel>.error-panel {
+    background-color: #ffffff;
+    margin: 6px -2px 2px -4px;
+    padding: 4px 6px;
+    color: #880000;
+    font-weight: bold;
+}
+
+/* CallPanel -------------------------------------------------------- */
+.call-panel {
+    margin: 1px -2px 0px -4px;
+    padding: 4px;
+    background-color: #ffffff;
+    font-family: monospace;
+}
+
+.call-panel:nth-child(2) {
+    margin-top: 4px;
+}
+
+.call-panel:last-child {
+    margin-bottom: 2px;
+}
+
+.call-method {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.call-line {
+    min-width: 42px;
+    text-align: end;
+    margin-right: 4px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.call-duration {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.call-spinner {
+    background: url(../img/spinner.gif) no-repeat center;
+    background-size: contain;
+    height: 16px;
+    width: 16px;
+}
+
+.call-details {
+    white-space: pre;
+    color: #666666;
+    max-height: 280px;
+    overflow: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin: 4px 2px 2px 2px;
+    background-color: #f1f1f1;
+    display: flex;
+    flex-direction: row;
+}
+
+.call-params {
+    width: 50%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+    flex-shrink: 0;
+    flex-grow: 0;
+    border-right: solid 1px #aaaaaa;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: 100%;
+}
+
+.call-result {
+    flex-grow: 1;
+    flex-shrink: 1;
+    border-left: solid 1px #aaaaaa;
+    margin-left: -1px;
+    padding-left: 8px;
+    padding-right: 8px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+    height: 100%;
+}
+
+/* InfoPanel ------------------------------------------------------------------ */
+
+.info-panel {
+    padding: 4px 8px;
+    background-color: #ffffff;
+    font-family: monospace;
+    color: #376dab;
+}
+
+.info-icon {
+    width: 19px;
+    font-size: 75%;
+}
+
+.script-panel .info-panel, 
+.suite-panel .info-panel {
+    margin-left: 24px;
+    padding-left: 11px;
+}
+
+.test-panel .info-panel {
+    margin: 1px -2px 0px -4px;
+    padding-left: 31px;
+}
+
+.test-panel+.info-panel {
+    border-top: solid 1px #aaccaa;
+}
+
+.test-panel .info-panel:nth-child(2) {
+    margin-top: 4px;
+}
+
+.test-panel .info-panel:last-child {
+    margin-bottom: 2px;
+}
+
+/* SummaryPanel --------------------------------------------------------------- */
+
+.summary-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.run-environment {
+    font-weight: bold;
+    color: #555555;
+}
+
+.run-test-count {
+    min-width: 48px;
+    text-align: end;
+    padding: 2px 4px;
+    font-weight: bold;
+    border-radius: 4px;
+    /*margin: -6px 0px -6px 8px;*/
+    margin-left: 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.run-test-count.pass {
+    background-color: #f0f8eb;
+    color: #006600;
+}
+
+.run-test-count.fail {
+    background-color: #ffd0d0;
+    color: #880000;
+    visibility: hidden;
+}
+
+.run-duration {
+    min-width: 76px;
+    margin-right: 42px;
+    text-align: end;
+}
+
+.run-spinner {
+    background: url(../img/spinner.gif) no-repeat center;
+    background-size: contain;
+    height: 16px;
+}

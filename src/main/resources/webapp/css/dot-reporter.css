@@ -1,0 +1,35 @@
+.dot-reporter-script {
+    font-family: 'DejaVu Sans Mono', monospace;
+    font-size: 14px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dot-reporter-script-odd {
+    background-color: #f0f0f0
+}
+
+.dot-reporter-results {
+    letter-spacing: 6px;
+    font-weight: bold;
+    color: #008800;
+    word-wrap: break-word;
+}
+
+.dot-reporter-fail {
+    color: #dd0000;
+}
+
+.dot-reporter-time {
+    font-weight: normal;
+    letter-spacing: 2px;
+    word-wrap: normal;
+}
+
+.dot-reporter-fail-time {
+    color: #dd0000;
+    font-weight: normal;
+    letter-spacing: 2px;
+    word-wrap: normal;
+}

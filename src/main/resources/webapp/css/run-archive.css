@@ -1,0 +1,101 @@
+.fa-fw {
+    width: 1em;
+}
+
+.run-archive-panel {
+    padding: 8px;
+}
+
+.run-archive-summary {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+}
+
+.run-archive-title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* ScriptPanel ----------------------------------------------- */
+
+.month-panel {
+    margin-top: 6px;
+}
+
+.month-panel .month-details {
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 14px;
+    padding: 0px 8px;
+}
+
+.month-panel .month-spacer {
+    height: 6px;
+    margin-right: 8px;
+    border-top: solid 1px #aaaaaa;
+}
+
+.month-panel:nth-child(1) .month-spacer {
+    border-top-width: 0px;
+    height: 2px;
+}
+
+.month-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    direction: rtl;
+    text-align: left;
+    margin-left: 8px;
+}
+
+/* DayPanel ---------------------------------------------- */
+
+.day-panel {
+    margin-left: 28px;
+    margin-top: 4px;
+    padding-left: 4px;
+    padding-top: 4px;
+    border-top: solid 1px #aaaaaa;
+}
+
+.run-archive-summary+.day-panel {
+    border-top-width: 0px;
+}
+
+.day-name {
+    margin-left: 8px;
+}
+
+/* RunPanel ------------------------------------------------ */
+
+.run-panel {
+    margin-left: 24px;
+    padding: 2px 8px 4px 10px;
+    /*border-top: solid 1px #aaccaa;*/
+}
+
+.run-panel:hover {
+    background-color: #eeeeee;
+}
+
+.run-archive-summary+.run-panel {
+    padding-top: 4px;
+}
+
+.run-name {
+    margin-left: 8px;
+}
+
+.run-panel .run-duration {
+    min-width: 76px;
+    margin-right: 0px;
+    text-align: end;
+}
