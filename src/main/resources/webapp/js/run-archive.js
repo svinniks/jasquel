@@ -108,19 +108,26 @@ RunArchive.prototype.display = function(what) {
     if (this.runArchivePanelLayout.scrollableControls._size == 0)
         return;
 
-    var topControl = this.runArchivePanelLayout.scrollableControls.getRanked(this.runArchivePanelLayout.rank);
-
-    var child = this.runArchivePanel.firstChild;
+    let child = this.runArchivePanel.firstChild;
 
     while (child) {
         this.displayControl(child, what);
         child = child.nextSibling;
     }
 
-    while (!this.runArchivePanelLayout.scrollableControls.get(topControl.feedLayoutId))
-        topControl = topControl.parent;
+    let rank = this.runArchivePanelLayout.rank;
 
-    this.runArchivePanelLayout.rank = this.runArchivePanelLayout.scrollableControls.rank(topControl.feedLayoutId);
+    if (rank) {
+
+        let topControl = this.runArchivePanelLayout.scrollableControls.getRanked(rank ? rank : 1);
+
+        while (!this.runArchivePanelLayout.scrollableControls.get(topControl.feedLayoutId))
+            topControl = topControl.parent;
+
+        this.runArchivePanelLayout.rank = this.runArchivePanelLayout.scrollableControls.rank(topControl.feedLayoutId);
+
+    }
+
     this.runArchivePanelLayout.refresh();
 
 }
@@ -275,7 +282,7 @@ RunPanel.prototype.createDOM = function() {
     this.dom.summary.failCount.style.visibility = this.run.summary.failCount ? "visible" : "hidden";
 
     this.dom.summary.on("click", function() {
-        location.hash = "#run/" + this.run.id;
+        location.hash = "#runs/" + this.run.id;
     }.bind(this));
 
 }

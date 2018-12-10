@@ -476,6 +476,10 @@ var Caption = function(options) {
 
 extend(Element, Caption);
 
+Caption.prototype.setText = function(text) {
+    this.container.innerHTML = text;
+}
+
 /* ProgressBar ------------------------------------------------------- */
 
 var progressBarLayout = new DockLayout();
@@ -576,6 +580,13 @@ var DialogPanel = function(options) {
 
     this.container.classList.add("dialog");
 
+    this.container.addEventListener("keyup", function(event) {
+        if (event.key == "Enter" && this.okButton && this.okButton.onclick)
+            this.okButton.onclick();
+        else if (event.key == "Escape" && this.cancelButton && this.cancelButton.onclick)
+            this.cancelButton.onclick();
+    }.bind(this))
+
     this.titlePanel = this.add(new DialogTitle({
         align: "top",
         title: this.title
@@ -585,6 +596,11 @@ var DialogPanel = function(options) {
         align: "bottom",
         classes: ["button-panel"]
     }));
+
+    this.contentContainer = this.add(new Div({
+        align: "center",
+        classes: ["dialog-content"]
+    }))
 
 }
 
@@ -660,3 +676,35 @@ Select.prototype.select = function(option, propagate) {
         this.onselect();
 
 }
+
+/* TextBox */
+var TextBox = function(options) {
+
+    Control.call(this, options);
+
+    this.container = dd("div", {
+        input: dd("input.text-box-input")
+    });
+
+};
+
+extend(Control, TextBox);
+
+/* CheckBox */
+var CheckBox = function(options) {
+
+    Control.call(this, options);
+
+    this.container = dd("div", {
+        input: dd("input")
+    });
+    this.container.input.setAttribute("type", "checkbox");
+
+    this.container.input.addEventListener('change', function() {
+        if (this.onchange)
+            this.onchange();
+    }.bind(this));
+
+};
+
+extend(Control, CheckBox);

@@ -392,7 +392,7 @@ public class ConsoleReporter extends Reporter {
         if (unitStack.isEmpty()) {
             
             out.println();
-            out.printf("Run finished in %s with error:\n", formatDurationHours(message.duration));
+            out.printf("ActiveRun finished in %s with error:\n", formatDurationHours(message.duration));
             out.println(message.message);
             
         } else {
@@ -485,7 +485,7 @@ public class ConsoleReporter extends Reporter {
             out.printf("\u001B[0m");
         
         out.println();
-        out.printf("Run finished in %s.\n", formatDurationHours(duration));
+        out.printf("ActiveRun finished in %s.\n", formatDurationHours(duration));
         
     }
     

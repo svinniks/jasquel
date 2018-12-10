@@ -115,40 +115,47 @@ Reporter.prototype.createLayout = function() {
         align: "left"
     }));
 
-    this.clearButton = this.toolbar.add(new Button({
-        align: "left",
-        icon: "fa fa-eraser",
-        caption: "Clear",
-        onclick: function() {
+    if (!this.shared)
+        this.clearButton = this.toolbar.add(new Button({
+            align: "left",
+            icon: "fa fa-eraser",
+            caption: "Clear",
+            onclick: function() {
 
-            this.detailPanel.clear();
-            this.detailPanel.setPassCount(0);
-            this.detailPanel.setFailCount(0);
-            
-            if (this.unitStack.length > 1) {
+                this.detailPanel.clear();
+                this.detailPanel.setPassCount(0);
+                this.detailPanel.setFailCount(0);
 
-                var scriptPanel = this.unitStack[1].control;
+                if (this.unitStack.length > 1) {
 
-                this.detailPanel.add(scriptPanel);
-                this.detailPanel.setPassCount(scriptPanel.passCount);
-                this.detailPanel.setFailCount(scriptPanel.failCount);
+                    var scriptPanel = this.unitStack[1].control;
 
-            } else {
+                    this.detailPanel.add(scriptPanel);
+                    this.detailPanel.setPassCount(scriptPanel.passCount);
+                    this.detailPanel.setFailCount(scriptPanel.failCount);
 
-                this.detailPanel.resetDuration();
+                } else {
 
-            }
+                    this.detailPanel.resetDuration();
 
-        }.bind(this)
-    }));
+                }
 
-    this.stopButton = this.toolbar.add(new Button({
-        align: "left",
-        icon: "fa fa-stop",
-        caption: "Stop"
-    }));
+                this.reporterLayout.refresh();
 
-    this.stopButton.container.querySelector(".button-icon").style.color = "#880000";
+            }.bind(this)
+        }));
+
+    if (this.active) {
+
+        this.stopButton = this.toolbar.add(new Button({
+            align: "left",
+            icon: "fa fa-stop",
+            caption: "Stop"
+        }));
+
+        this.stopButton.container.querySelector(".button-icon").style.color = "#880000";
+
+    }
 
     this.summaryPanel = this.toolPanel.add(new SummaryPanel({
         align: "right"
@@ -252,9 +259,6 @@ Reporter.prototype.runStart = function(data) {
         type: "Run",
         control: this.detailPanel
     });
-
-    this.environment = data.environment;
-    this.page.tab.anchor.caption.innerHTML = this.environment;
 
 }
 
@@ -379,16 +383,17 @@ RunReporter.prototype.createLayout = function() {
 
     Reporter.prototype.createLayout.bind(this)();
 
-    this.stopButton.onclick = function() {
-        
-        $.ajax({
-            url: `api/run/${this.runId}`,
-            method: "PUT"
-        });
+    if (this.stopButton)
+        this.stopButton.onclick = function() {
 
-        this.stopButton.hide();
-        
-    }.bind(this);
+            $.ajax({
+                url: `api/runs/${this.runId}`,
+                method: "PUT"
+            });
+
+            this.stopButton.hide();
+
+        }.bind(this);
 
     this.startButton = this.toolbar.add(new Button({
         align: "left",
@@ -399,7 +404,7 @@ RunReporter.prototype.createLayout = function() {
             this.detailPanel.hideDuration();
             this.startButton.hide();
 
-            startRun(this.environment, this.page);
+            startRun(this.environment, getSelectedPaths(), false, null, this.page);
 
         }.bind(this)
     }));
@@ -410,8 +415,11 @@ RunReporter.prototype.createLayout = function() {
 
 RunReporter.prototype.onrunend = function() {
 
-    this.stopButton.hide(); 
-    this.startButton.show();
+    if (this.stopButton)
+        this.stopButton.hide();
+
+    if (!this.shared)
+        this.startButton.show();
 
 }
 
@@ -429,18 +437,19 @@ WatchReporter.prototype.createLayout = function() {
 
     Reporter.prototype.createLayout.bind(this)();
 
-    this.stopButton.onclick = function() {
-        
-        this.restart = true;
+    if (this.stopButton)
+        this.stopButton.onclick = function() {
 
-        $.ajax({
-            url: `api/run/${this.runId}`,
-            method: "PUT"
-        });
+            this.restart = true;
 
-        this.stopButton.hide();
-        
-    }.bind(this);
+            $.ajax({
+                url: `api/runs/${this.runId}`,
+                method: "PUT"
+            });
+
+            this.stopButton.hide();
+
+        }.bind(this);
 
 }
 

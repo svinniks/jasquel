@@ -305,6 +305,10 @@
     padding: 4px;
 }
 
+.dialog-content {
+    padding: 4px
+}
+
 /* Select */
 
 .select {
@@ -340,4 +344,11 @@
 
 .select .option:hover {
     background-color: #dddddd;
+}
+
+/* Text box */
+
+.text-box-input {
+    width: 100%;
+    height: 100%;
 }

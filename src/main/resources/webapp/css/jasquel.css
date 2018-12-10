@@ -43,8 +43,21 @@
 }
 
 .run-dialog {
-    width: 320px;
-    height: 160px;
+    width: 640px;
+    height: 320px;
+}
+
+.run-dialog-row {
+    min-height: 22px
+}
+
+.run-dialog-caption {
+    width: 110px;
+    text-align: right;
+}
+
+.run-dialog-scripts .scroll-content{
+    margin: 4px;
 }
 
 /* jsTree custom */

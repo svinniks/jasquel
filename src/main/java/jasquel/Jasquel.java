@@ -129,7 +129,7 @@ public class Jasquel {
         runDirectory = new File(runDirOption);
 
         if (!runDirectory.exists() || !runDirectory.isDirectory()) {
-            throw new IllegalArgumentException(String.format("Run directory path %s does not exist or is not a directory!", runDirOption));
+            throw new IllegalArgumentException(String.format("ActiveRun directory path %s does not exist or is not a directory!", runDirOption));
         }
 
         runDirectory = runDirectory.getAbsoluteFile();

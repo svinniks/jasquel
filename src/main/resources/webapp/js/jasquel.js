@@ -14,22 +14,22 @@ $(function() {
                 config: config
             });
 
+            window.addEventListener("hashchange", function(event) {
+
+                if (!location.hash)
+                    return;
+
+                if (!application.tabPages.activePage || application.tabPages.activePage.hash != location.hash)
+                    attach(location.hash);
+
+            }, false);
+
             if (location.hash)
                 attach(location.hash);
+            else
+                location.hash = "#archive";
 
         }.bind(this));
-
-    window.addEventListener("hashchange", function(event) {
-
-        if (!location.hash)
-            return;
-
-        if (!application.tabPages.activePage || application.tabPages.activePage.hash != location.hash)
-            attach(location.hash);
-
-    }, false);
-
-    location.hash = "#archive";
 
 });
 
@@ -123,8 +123,19 @@ var Jasquel = function(options) {
     }));
 
     this.runButton.container.onclick = function(event) {
-        startRun(application.environmentSelect.selection);
-        //application.showModal(this.runDialog);
+
+        this.runDialog.setEnvironment(application.environmentSelect.selection);
+        this.runDialog.setPaths(getSelectedPaths());
+
+        this.runDialog.publicCheckBox.container.input.checked = false;
+
+        this.runDialog.descriptionTextBox.container.input.value = "";
+        this.runDialog.descriptionTextBox.container.input.disabled = true;
+
+        application.showModal(this.runDialog);
+
+        this.runDialog.publicCheckBox.container.input.focus();
+
     }.bind(this);
 
     this.watchButton = this.toolbar.add(new Button({
@@ -167,19 +178,23 @@ var Jasquel = function(options) {
         align: "center"
     }));
 
+    let runArchive = new RunArchive({
+        align: "center"
+    });
+
     this.runArchivePage = this.tabPages.add(new TabPage({
         caption: "Run archive",
         icon: "fa.fa-archive",
-        hash: "#archive"
+        hash: "#archive",
+        runArchive: runArchive
     }));
 
     this.runArchivePage.onactivate = function() {
         location.hash = this.hash;
+        runArchive.runArchivePanelLayout.refresh();
     };
     
-    this.runArchivePage.add(new RunArchive({
-        align: "center"
-    }))
+    this.runArchivePage.add(runArchive);
 
     refreshFileTree(); 
 
@@ -319,7 +334,7 @@ function startWatch(environment, reporter) {
 function createWatchPage(environment) {
     
     var watchPage = application.tabPages.add(new TabPage({
-        caption: "Watch",
+        caption: environment,
         icon: "fa.fa-eye",
         closable: true,
         hash: "#watch/" + environment
@@ -328,8 +343,6 @@ function createWatchPage(environment) {
     application.tabPages.setActive(watchPage);
 
     watchPage.onclose = function() {
-
-        console.log(this.hash);
 
         reporterPages[this.hash] = undefined;
 
@@ -351,7 +364,10 @@ function createWatchPage(environment) {
         environment: environment,
         page: watchPage
     }));
-    
+
+    reporter.shared = false;
+    reporter.active = true;
+
     watchPage.reporter = reporter;
     reporter.createLayout();
 
@@ -361,24 +377,23 @@ function createWatchPage(environment) {
 
 /* Start a new Run for the selected files and folders */
 
-function startRun(environment, reporterPage) {
-
-    var paths = getSelectedPaths();
+function startRun(environment, paths, shared, description, reporterPage) {
 
     $.post(
 
-        "api/run",
+        "api/runs",
 
         JSON.stringify({
             environment: environment,
             paths: paths,
             threads: 1,
-            shared: true
+            shared: shared,
+            description: description
         }),
 
         function(response) {
 
-            var hash = "#run/" + response.runId;
+            var hash = "#runs/" + response.runId;
 
             if (reporterPage) {
 
@@ -430,13 +445,25 @@ function getSelectedPaths() {
 
 }
 
-function createRunPage(runId) {
+function createRunPage(runId, summary) {
+
+    let caption;
+
+    if (summary.shared) {
+
+        caption = moment(summary.startTime).format("YYYY-MM-DD HH:mm:ss") + " " + summary.environment;
+
+        if (summary.description)
+            caption += ": " + summary.description;
+
+    } else
+        caption = summary.environment;
 
     var runPage = new TabPage({
-        caption: "Run",
+        caption: caption,
         icon: "fa.fa-play",
         closable: true,
-        hash: "#run/" + runId
+        hash: "#runs/" + runId
     });
 
     application.tabPages.add(runPage);
@@ -464,6 +491,10 @@ function createRunPage(runId) {
         page: runPage
     }));
 
+    reporter.environment = summary.environment;
+    reporter.shared = summary.shared;
+    reporter.active = summary.active;
+
     runPage.reporter = reporter;
     reporter.createLayout();
 
@@ -473,7 +504,7 @@ function createRunPage(runId) {
 
 function attachRun(reporter, runId) {
 
-    var eventSource = new EventSource(`api/run/${runId}`);
+    var eventSource = new EventSource(`api/runs/${runId}/events`);
     var dispatcher = new MessageDispatcher(reporter);
 
     reporter.runId = runId;
@@ -506,7 +537,7 @@ function attach(target) {
 
     else if (/^#watch\//.test(target)) {
 
-        var environment = target.substr(7).toUpperCase();
+        let environment = target.substr(7).toUpperCase();
 
         if (application.config.environments.indexOf(environment) < 0)
             return;
@@ -514,12 +545,17 @@ function attach(target) {
         reporterPages[target] = createWatchPage(environment);
         startWatch(environment, reporterPages[target].reporter);
         
-    } else if (/^#run\//.test(target)) {
+    } else if (/^#runs\//.test(target)) {
 
-        var runId = target.substr(5);
+        let runId = target.substr(6);
 
-        reporterPages[target] = createRunPage(runId);
-        attachRun(reporterPages[target].reporter, runId);
+        $.get(
+            `api/runs/${runId}/summary`,
+            function(summary) {
+                reporterPages[target] = createRunPage(runId, summary);
+                attachRun(reporterPages[target].reporter, runId);
+            }
+        );
 
     }
 
@@ -530,7 +566,7 @@ function attach(target) {
 var RunDialog = function() {
 
     DialogPanel.call(this, {
-        title: "Start run"
+        title: "Start test run"
     });
 
     this.container.classList.add("run-dialog");
@@ -543,16 +579,107 @@ var RunDialog = function() {
         }
     }));
 
-    this.startButton = this.buttonPanel.add(new Button({
+    this.okButton = this.buttonPanel.add(new Button({
         align: "right",
         caption: "Start",
         onclick: function() {
             application.hideModal();
-            startRun(createRunPage().reporter);
-        }
+            startRun(this.environment, this.paths, this.publicCheckBox.container.input.checked, this.descriptionTextBox.container.input.value);
+        }.bind(this)
+    }));
+
+    this.environmentContainer = this.contentContainer.add(new Div({
+        align: "top",
+        classes: ["run-dialog-row"]
+    }));
+
+    this.environmentContainer.add(new Caption({
+        align: "left",
+        text: "Environment:",
+        classes: ["run-dialog-caption"]
+    }));
+
+    this.environmentCaption = this.environmentContainer.add(new Caption({
+        align: "left"
+    }));
+
+    this.scriptContainer = this.contentContainer.add(new Div({
+        align: "center",
+        classes: ["run-dialog-row"]
+    }));
+
+    this.scriptCaptionContainer = this.scriptContainer.add(new Div({
+        width: "110px",
+        align: "left",
+    }))
+
+    this.scriptCaptionContainer.add(new Caption({
+        align: "top",
+        text: "Scripts:",
+        classes: ["run-dialog-caption"]
+    }));
+
+    this.scriptList = this.scriptContainer.add(new ScrollPanel({
+        align: "center",
+        classes: ["embedded", "run-dialog-scripts"]
+    }));
+
+    this.descriptionContainer = this.contentContainer.add(new Div({
+        align: "bottom",
+        classes: ["run-dialog-row"]
+    }));
+
+    this.descriptionContainer.add(new Caption({
+        align: "left",
+        text: "Description:",
+        classes: ["run-dialog-caption"]
+    }));
+
+    this.descriptionTextBox = this.descriptionContainer.add(new TextBox({
+        align: "center"
+    }));
+
+    this.publicRunCheckContainer = this.contentContainer.add(new Div({
+        align: "bottom",
+        classes: ["run-dialog-row"]
+    }));
+
+    this.publicRunCheckContainer.add(new Caption({
+        align: "left",
+        text: "Public run:",
+        classes: ["run-dialog-caption"]
+    }));
+
+    this.publicCheckBox = this.publicRunCheckContainer.add(new CheckBox({
+        align: "left",
+        onchange: function() {
+
+            this.descriptionTextBox.container.input.disabled = !this.publicCheckBox.container.input.checked;
+
+            if (!this.publicCheckBox.container.input.checked)
+                this.descriptionTextBox.container.input.value = "";
+
+        }.bind(this)
     }));
 
 };
 
 extend(DialogPanel, RunDialog);
 
+RunDialog.prototype.setEnvironment = function(environment) {
+    this.environment = environment;
+    this.environmentCaption.setText(environment);
+}
+
+RunDialog.prototype.setPaths = function(paths) {
+
+    this.paths = paths;
+
+    this.scriptList.content.innerHTML = "";
+
+    for (let path of paths) {
+        this.scriptList.content.appendChild(document.createTextNode(path));
+        this.scriptList.content.appendChild(document.createElement("br"));
+    }
+
+}

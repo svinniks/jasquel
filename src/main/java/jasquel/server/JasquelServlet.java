@@ -11,10 +11,7 @@ import jasquel.Jasquel;
 import jasquel.Project;
 import jasquel.exceptions.ArgumentException;
 import jasquel.reporter.SSEReporter;
-import jasquel.run.FileRunner;
-import jasquel.run.FileWatcher;
-import jasquel.run.Run;
-import jasquel.run.ScriptEnginePool;
+import jasquel.run.*;
 import jasquel.run.manager.RunManager;
 import org.apache.commons.io.FilenameUtils;
 
@@ -30,9 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static jasquel.common.Log.LOGGER;
 import static java.util.logging.Level.SEVERE;
@@ -45,20 +41,23 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
  */
 public class JasquelServlet extends HttpServlet {
 
+    private final static Gson GSON = new Gson();
+
     private final Pattern JS_FILE_PATTERN = Pattern.compile(".*\\.js");
-    private final Pattern SUMMARY_FILE_PATTERN = Pattern.compile("^.*\\.summary\\.json$");
-    
+
     private String project;
     private Jasquel jasquel;
 
     private ScriptEnginePool enginePool;
     private RunManager runManager;
-    
-    @SuppressWarnings("SynchronizeOnNonFinalField")
-    private void processRunGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException {
-        
-        String runId = request.getPathInfo().substring(5);
-        Run run = runManager.getRun(runId);
+
+    private void processGetRunEvents(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException {
+
+        Matcher matcher = Pattern.compile("^/runs/(.*)/events").matcher(request.getPathInfo());
+        matcher.find();
+        String runId = matcher.group(1);
+
+        AbstractRun run = runManager.getRun(runId);
             
         if (run == null) 
     
@@ -67,7 +66,6 @@ public class JasquelServlet extends HttpServlet {
         else {
                    
             response.setContentType("text/event-stream");
-            //response.setContentType("text/html");
             response.setCharacterEncoding("UTF-8");
             response.addHeader("Cache-Control", "no-cache");
 
@@ -85,6 +83,33 @@ public class JasquelServlet extends HttpServlet {
             
         }
         
+    }
+
+    private void processGetRunSummary(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException {
+
+        Matcher matcher = Pattern.compile("^/runs/(.*)/summary").matcher(request.getPathInfo());
+        matcher.find();
+        String runId = matcher.group(1);
+
+        AbstractRun run = runManager.getRun(runId);
+
+        if (run == null)
+
+            response.setStatus(SC_NOT_FOUND);
+
+        else {
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            try (PrintWriter writer = response.getWriter()) {
+                GSON.toJson(run.getSummary(), AbstractRun.Summary.class, writer);
+            }
+
+            response.setStatus(SC_OK);
+
+        }
+
     }
     
     private void outputFileDir(File dir, JsonWriter jsonWriter) throws IOException {
@@ -131,7 +156,7 @@ public class JasquelServlet extends HttpServlet {
         
     }
     
-    private void processFilesGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processGetFiles(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         response.setContentType("application/json");
         
@@ -161,46 +186,19 @@ public class JasquelServlet extends HttpServlet {
             LocalDate fileDate;
 
             try {
-
                 fileDate = LocalDate.parse(file.getName().substring(0, 10), DateTimeFormatter.ofPattern("yyyy_MM_dd"));
-
             } catch (Exception ex) {
                 continue;
             }
 
             String id = FilenameUtils.removeExtension(file.getName());
-            Run.Summary summary = null;
+            AbstractRun.Summary summary;
 
-            Run activeRun = runManager.getActiveRun(id);
-
-            if (activeRun != null)
-                summary = activeRun.getSummary();
-            else
-                try (
-                        FileInputStream fileInputStream = new FileInputStream(file);
-                        ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
-                        InputStreamReader zipReader = new InputStreamReader(zipInputStream)
-                ) {
-
-                    ZipEntry zipEntry = zipInputStream.getNextEntry();
-
-                    while (zipEntry != null) {
-
-                        if (zipEntry.getName().equals("summary.json")) {
-                            summary = runManager.loadRunSummary(zipReader);
-                            break;
-                        }
-
-                        zipEntry = zipInputStream.getNextEntry();
-
-                    }
-
-                } catch (IOException ex) {
-                    continue;
-                }
-
-            if (summary == null)
+            try {
+                summary = runManager.getRun(id).getSummary();
+            } catch(Exception ex) {
                 continue;
+            }
 
             String month = fileDate.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault()) + ", " + fileDate.getYear();
             String day = fileDate.getDayOfMonth() + ", " + fileDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault());
@@ -244,7 +242,7 @@ public class JasquelServlet extends HttpServlet {
                 .name("id").value(id)
                 .name("summary");
 
-            gson.toJson(summary, Run.Summary.class, jsonWriter);
+            gson.toJson(summary, ActiveRun.Summary.class, jsonWriter);
 
             jsonWriter.endObject();
 
@@ -261,20 +259,20 @@ public class JasquelServlet extends HttpServlet {
 
     }
     
-    private void processRunsGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processGetRuns(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         response.setContentType("application/json");
         
         try (PrintWriter writer = response.getWriter(); JsonWriter jsonWriter = new JsonWriter(writer)) {
             outputRuns(jsonWriter);
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             LOGGER.log(SEVERE, "Failed to load run list!", ex);
             throw ex;
         }
         
     }
 
-    private void processConfigGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processGetConfig(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         response.setContentType("text/html");
         response.setStatus(SC_OK);
@@ -309,15 +307,17 @@ public class JasquelServlet extends HttpServlet {
         String requestPath = request.getPathInfo() == null ? "" : request.getPathInfo();
         
         try {
-            
-            if (requestPath.matches("^/run/.*$"))
-                processRunGetRequest(request, response);
-            else if ("/runs".equals(requestPath))
-                processRunsGetRequest(request, response);
+
+            if ("/runs".equals(requestPath))
+                processGetRuns(request, response);
+            else if (requestPath.matches("^/runs/.*/events$"))
+                processGetRunEvents(request, response);
+            else if (requestPath.matches("^/runs/.*/summary$"))
+                processGetRunSummary(request, response);
             else if ("/files".equals(requestPath))
-                processFilesGetRequest(request, response);
+                processGetFiles(request, response);
             else if ("/config".equals(requestPath))
-                processConfigGetRequest(request, response);
+                processGetConfig(request, response);
             else
                 response.setStatus(SC_NOT_FOUND);
             
@@ -328,7 +328,7 @@ public class JasquelServlet extends HttpServlet {
     }
  
     @SuppressWarnings("SynchronizeOnNonFinalField")
-    private void processWatchPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException, ArgumentException {
+    private void processPostWatch(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException, ArgumentException {
         
         WatchRequest watchRequest = new Gson().fromJson(request.getReader(), WatchRequest.class);
 
@@ -339,7 +339,7 @@ public class JasquelServlet extends HttpServlet {
         else if (!project.getEnvironmentList().contains(watchRequest.environment))
             throw new ArgumentException(String.format("Invalid environment %s!", watchRequest.environment));
 
-        Run run = runManager.startRun(watchRequest.environment);
+        ActiveRun run = runManager.startRun(watchRequest.environment);
 
         FileWatcher watcher = new FileWatcher(
             enginePool,
@@ -369,7 +369,7 @@ public class JasquelServlet extends HttpServlet {
     }
     
     @SuppressWarnings("SynchronizeOnNonFinalField")
-    private void processRunPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException, ArgumentException {
+    private void processPostRuns(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException, ArgumentException {
         
         RunRequest runRequest = new Gson().fromJson(request.getReader(), RunRequest.class);
         
@@ -383,7 +383,7 @@ public class JasquelServlet extends HttpServlet {
         else if (!project.getEnvironmentList().contains(runRequest.environment))
             throw new ArgumentException(String.format("Invalid environment %s!", runRequest.environment));
 
-        Run run = runManager.startRun(
+        ActiveRun run = runManager.startRun(
             runRequest.shared,
             runRequest.environment,
             runRequest.description
@@ -428,10 +428,10 @@ public class JasquelServlet extends HttpServlet {
             if (null != requestPath)
                 switch (requestPath) {
                 case "/watch":
-                    processWatchPostRequest(request, response);
+                    processPostWatch(request, response);
                     break;
-                case "/run":
-                    processRunPostRequest(request, response);
+                case "/runs":
+                    processPostRuns(request, response);
                     break;
                 default:
                     response.setStatus(SC_NOT_FOUND);
@@ -451,10 +451,10 @@ public class JasquelServlet extends HttpServlet {
     }
     
     @SuppressWarnings("SynchronizeOnNonFinalField")
-    private void processRunPutRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException {
+    private void processPutRun(HttpServletRequest request, HttpServletResponse response) throws IOException, ScriptException {
         
-        String runId = request.getPathInfo().substring(5);
-        Run run = runManager.getRun(runId);
+        String runId = request.getPathInfo().substring(6);
+        ActiveRun run = runManager.getActiveRun(runId);
         
         if (run == null)
             response.setStatus(SC_NOT_FOUND);
@@ -472,8 +472,8 @@ public class JasquelServlet extends HttpServlet {
         
         try {
             
-            if (requestPath.matches("^/run/.*$"))
-                processRunPutRequest(request, response);
+            if (requestPath.matches("^/runs/.*$"))
+                processPutRun(request, response);
             else
                 response.setStatus(SC_NOT_FOUND);
             
