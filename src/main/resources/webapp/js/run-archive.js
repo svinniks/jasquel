@@ -267,7 +267,10 @@ RunPanel.prototype.createDOM = function() {
         summary: dd("div.run-archive-summary", {
             icon: "span.fa.fa-fw.fa-play-circle-o",
             name: dd("span.run-name.run-archive-title", this.title),
-            failCount: dd("div.run-test-count.fail", this.run.summary.failCount),
+            failures: dd("div.script-failures", {
+                setupFailure: dd("span.setup-failure", "!"),
+                failCount: dd("div.run-test-count.fail", this.run.summary.failCount)
+            }),
             passCount: dd("div.run-test-count.pass", this.run.summary.passCount),
             duration: dd("span.run-duration")
         })
@@ -279,7 +282,9 @@ RunPanel.prototype.createDOM = function() {
         this.dom.summary.duration.classList.add("run-spinner");
 
     this.dom.summary.passCount.style.visibility = this.run.summary.passCount != undefined ? "visible" : "hidden";
-    this.dom.summary.failCount.style.visibility = this.run.summary.failCount ? "visible" : "hidden";
+
+    this.dom.summary.failures.failCount.style.display = this.run.summary.failCount ? "inline" : "none";
+    this.dom.summary.failures.setupFailure.style.display = this.run.summary.setupError ? "inline" : "none";
 
     this.dom.summary.on("click", function() {
         location.hash = "#runs/" + this.run.id;

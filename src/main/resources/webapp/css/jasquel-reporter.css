@@ -1,4 +1,4 @@
-.fa-fw {
+.fail.fa-fw {
     width: 1em;
 }
 
@@ -90,6 +90,16 @@
 .script-test-count.fail {
     background-color: #ffd0d0;
     color: #880000;
+    display: none;
+}
+
+.script-failures {
+    min-width: 90px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .script-duration {
@@ -142,11 +152,24 @@
 }
 
 .suite-test-count.pass {
+    font-weight: bold;
     color: #669966;
 }
 
 .suite-test-count.fail {
+    font-weight: bold;
     color: #aa6666;
+    display: none;
+}
+
+.suite-setup-failure {
+    font-weight: bold;
+    color: #aa6666;
+    margin-left: 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    padding: 2px 6px;
+    display: none;
 }
 
 .suite-duration {
@@ -323,6 +346,9 @@
 /* InfoPanel ------------------------------------------------------------------ */
 
 .info-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
     padding: 4px 8px;
     background-color: #ffffff;
     font-family: monospace;
@@ -332,6 +358,10 @@
 .info-icon {
     width: 19px;
     font-size: 75%;
+}
+
+.info-panel-text {
+    margin: 0px;
 }
 
 .script-panel .info-panel, 
@@ -390,7 +420,19 @@
 .run-test-count.fail {
     background-color: #ffd0d0;
     color: #880000;
-    visibility: hidden;
+    display: none;
+}
+
+.setup-failure {
+    background-color: #ffd0d0;
+    color: #880000;
+    font-weight: bold;
+    border-radius: 4px;
+    margin-left: 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    padding: 2px 6px;
+    display: none;
 }
 
 .run-duration {

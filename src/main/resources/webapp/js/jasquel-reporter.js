@@ -56,7 +56,7 @@ Reporter.prototype.createLayout = function() {
         align: "left",
         icon: "fa fa-angle-double-down",
         caption: "Auto",
-        isOn: true,
+        isOn: this.active,
         ontoggle: function() {
 
             if (this.toggleAutoScroll.isOn) {
@@ -96,7 +96,10 @@ Reporter.prototype.createLayout = function() {
         caption: "Calls"
     }));
 
-    this.toggleDisplay = new ToggleGroup([this.displayScripts, this.displaySuites, this.displayTests, this.displayCalls], this.displayTests);
+    this.toggleDisplay = new ToggleGroup(
+        [this.displayScripts, this.displaySuites, this.displayTests, this.displayCalls],
+        this.active ? this.displayTests : this.displayScripts
+    );
     
     this.toggleDisplay.onchange = function() {
 
@@ -125,6 +128,7 @@ Reporter.prototype.createLayout = function() {
                 this.detailPanel.clear();
                 this.detailPanel.setPassCount(0);
                 this.detailPanel.setFailCount(0);
+                this.detailPanel.setSetupFailure(false);
 
                 if (this.unitStack.length > 1) {
 
@@ -133,6 +137,7 @@ Reporter.prototype.createLayout = function() {
                     this.detailPanel.add(scriptPanel);
                     this.detailPanel.setPassCount(scriptPanel.passCount);
                     this.detailPanel.setFailCount(scriptPanel.failCount);
+                    this.detailPanel.setSetupFailure(scriptPanel.setupFailure);
 
                 } else {
 
@@ -171,7 +176,7 @@ Reporter.prototype.createLayout = function() {
 
     this.reporterLayout = new FeedLayout({
         autoRefresh: false,
-        autoScroll: true,
+        autoScroll: this.active,
         onscroll: function() {
             this.toggleAutoScroll.off();
             this.reporterLayout.autoScroll = false;
@@ -319,7 +324,7 @@ Reporter.prototype.success = function(data) {
     if (unit.control.setDuration)
         unit.control.setDuration(data.duration);
 
-    if (unit.type == "Test" || unit.type == "Setup" || unit.type == "Teardown")
+    if (unit.type == "Test")
 
         for (var i = 0; i < this.unitStack.length; i++) {
             var control = this.unitStack[i].control;
@@ -334,7 +339,7 @@ Reporter.prototype.success = function(data) {
 
 Reporter.prototype.error = function(data) {
 
-    var unit = this.unitStack.pop();
+    let unit = this.unitStack.pop();
 
     if (unit.control.fail)
         unit.control.fail(data.message);
@@ -342,11 +347,15 @@ Reporter.prototype.error = function(data) {
     if (unit.control.setDuration)
         unit.control.setDuration(data.duration);
 
-    if (unit.type == "Test" || unit.type == "Setup" || unit.type == "Teardown") 
-
+    if (unit.type == "Test")
         for (var i = 0; i < this.unitStack.length; i++) {
-            var control = this.unitStack[i].control;
+            let control = this.unitStack[i].control;
             control.setFailCount(control.failCount + 1);
+        }
+    else if (unit.type == "Setup" || unit.type == "Teardown")
+        for (var i = 0; i < this.unitStack.length; i++) {
+            let control = this.unitStack[i].control;
+            control.setSetupFailure(true);
         }
 
     else if (unit.type == "Run") 
@@ -395,21 +404,25 @@ RunReporter.prototype.createLayout = function() {
 
         }.bind(this);
 
-    this.startButton = this.toolbar.add(new Button({
-        align: "left",
-        icon: "fa fa-play",
-        caption: "Start",
-        onclick: function() {
+    if (!this.shared) {
 
-            this.detailPanel.hideDuration();
-            this.startButton.hide();
+        this.startButton = this.toolbar.add(new Button({
+            align: "left",
+            icon: "fa fa-play",
+            caption: "Start",
+            onclick: function () {
 
-            startRun(this.environment, getSelectedPaths(), false, null, this.page);
+                this.detailPanel.hideDuration();
+                this.startButton.hide();
 
-        }.bind(this)
-    }));
+                startRun(this.environment, getSelectedPaths(), false, null, this.page);
 
-    this.startButton.hide();
+            }.bind(this)
+        }));
+
+        this.startButton.hide();
+
+    }
 
 }
 
@@ -418,7 +431,7 @@ RunReporter.prototype.onrunend = function() {
     if (this.stopButton)
         this.stopButton.hide();
 
-    if (!this.shared)
+    if (this.startButton)
         this.startButton.show();
 
 }
@@ -480,18 +493,16 @@ extend(Panel, DetailPanel);
 DetailPanel.prototype.setPassCount = function(value) {
     this.passCount = value;
     this.summaryPanel.container.passCount.innerHTML = value;
-}
+};
 
 DetailPanel.prototype.setFailCount = function(value) {
-
     this.failCount = value;
     this.summaryPanel.container.failCount.innerHTML = value;
+    this.summaryPanel.container.failCount.style.display = value == 0 ? "none" : "block";
+};
 
-    if (value == 0)
-        this.summaryPanel.container.failCount.style.visibility = "hidden";
-    else
-        this.summaryPanel.container.failCount.style.visibility = "visible";
-
+DetailPanel.prototype.setSetupFailure = function(value) {
+    this.summaryPanel.container.setupFailure.style.display = value ? "block" : "none";
 }
 
 DetailPanel.prototype.setDuration = function(value) {
@@ -530,7 +541,7 @@ ReporterPanel.prototype.destroyDOM = function() {
 
     this.dom = undefined;
 
-}
+};
 
 /* Generic method for expanding/collapsing panels */
 
@@ -553,6 +564,7 @@ var ScriptPanel = function(options) {
 
     this.passCount = 0;
     this.failCount = 0;
+    this.setupFailure = false;
 
 }
 
@@ -572,15 +584,18 @@ ScriptPanel.prototype.setFailCount = function(value) {
     this.failCount = value;
 
     if (this.dom) {
-
-        this.dom.content.summary.fail.innerHTML = value;
-
-        if (this.failCount == 0)
-            this.dom.content.summary.fail.style.visibility = "hidden";
-        else
-            this.dom.content.summary.fail.style.visibility = "";
-
+        this.dom.content.summary.failures.fail.innerHTML = value;
+        this.dom.content.summary.failures.fail.style.display = this.failCount == 0 ? "none" : "inline";
     }
+
+}
+
+ScriptPanel.prototype.setSetupFailure = function(value) {
+
+    this.setupFailure = value;
+
+    if (this.dom)
+        this.dom.content.summary.failures.setupFailure.style.display = value ? "inline" : "none";
 
 }
 
@@ -603,19 +618,9 @@ ScriptPanel.prototype.fail = function(message) {
         message: message
     }));
 
-    if (this.dom) {
+    if (this.dom)
         this.dom.classList.add("fail");
-        this.dom.content.summary.icon.classList.remove("fa-file-text");
-        this.dom.content.summary.icon.classList.add("fa-times-circle");
-    }
 
-}
-
-ScriptPanel.prototype.icon = function() {
-    if (this.failed)
-        return "fa-times-circle";
-    else
-        return "fa-file-text";
 }
 
 ScriptPanel.prototype.createDOM = function() {
@@ -624,9 +629,12 @@ ScriptPanel.prototype.createDOM = function() {
         spacer: "div.script-spacer",
         content: dd("div.script-details", {
             summary: dd("div.unit-summary", {
-                icon: `span.fa.fa-fw.${this.icon()}`,
-                name: dd("span.script-name", this.scriptName),
-                fail: dd("span.script-test-count.fail", this.failCount),
+                icon: `span.fa.fa-fw.fa-file-text`,
+                name: dd("div.script-name", this.scriptName),
+                failures: dd("div.script-failures", {
+                    setupFailure: dd("span.setup-failure", "!"),
+                    fail: dd("span.script-test-count.fail", this.failCount)
+                }),
                 pass: dd("span.script-test-count.pass", this.passCount),
                 duration: "span.script-duration"
             })
@@ -638,8 +646,11 @@ ScriptPanel.prototype.createDOM = function() {
 
     this.dom.content.summary.on("click", toggleCollapsed.bind(this));
 
-    if (this.failCount == 0)
-        this.dom.content.summary.fail.style.visibility = "hidden";
+    if (this.setupFailure)
+        this.dom.content.summary.failures.setupFailure.style.display = "inline";
+
+    if (this.failCount > 0)
+        this.dom.content.summary.failures.fail.style.display = "inline";
 
     if (this.duration)
         this.dom.content.summary.duration.innerHTML = this.duration.toHourTime();
@@ -677,15 +688,18 @@ SuitePanel.prototype.setFailCount = function(value) {
     this.failCount = value;
 
     if (this.dom) {
-
-        this.dom.summary.fail.innerHTML = value;
-
-        if (this.failCount == 0)
-            this.dom.summary.fail.style.visibility = "hidden";
-        else
-            this.dom.summary.fail.style.visibility = "";
-
+        this.dom.summary.failures.fail.innerHTML = value;
+        this.dom.summary.failures.fail.style.display = value == 0 ? "none" : "inline";
     }
+
+}
+
+SuitePanel.prototype.setSetupFailure = function(value) {
+
+    this.setupFailure = value;
+
+    if (this.dom)
+        this.dom.summary.failures.setupFailure.style.display = value ? "inline" : "none";
 
 }
 
@@ -708,28 +722,21 @@ SuitePanel.prototype.fail = function(message) {
         message: message
     }));
 
-    if (this.dom) {
+    if (this.dom)
         this.dom.classList.add("fail");
-        this.dom.summary.icon.classList.remove("fa-folder-o");
-        this.dom.summary.icon.classList.add("fa-times-circle");
-    }
 
-}
-
-SuitePanel.prototype.icon = function() {
-    if (this.failed)
-        return "fa-times-circle";
-    else
-        return "fa-folder-o";
 }
 
 SuitePanel.prototype.createDOM = function() {
 
     this.dom = dd("div.control.suite-panel", {
         summary: dd("div.unit-summary", {
-            icon: `span.fa.fa-fw.${this.icon()}`,
+            icon: `span.fa.fa-fw.fa-folder-o`,
             name: dd("span.unit-name.suite-name", this.suiteName),
-            fail: dd("span.suite-test-count.fail", this.failCount),
+            failures: dd("div.script-failures", {
+                setupFailure: dd("span.suite-setup-failure", "!"),
+                fail: dd("span.suite-test-count.fail", this.failCount)
+            }),
             pass: dd("span.suite-test-count.pass", this.passCount),
             duration: "span.suite-duration"
         })
@@ -743,8 +750,11 @@ SuitePanel.prototype.createDOM = function() {
     else
         this.dom.summary.duration.classList.add("script-spinner");
 
-    if (this.failCount == 0)
-        this.dom.summary.fail.style.visibility = "hidden";
+    if (this.failCount > 0)
+        this.dom.summary.failures.fail.style.display = "inline";
+
+    if (this.setupFailure)
+        this.dom.summary.failures.setupFailure.style.display = "inline";
 
     this.dom.summary.on("click", toggleCollapsed.bind(this));
 
@@ -766,11 +776,8 @@ TestPanel.prototype.fail = function(message) {
         message: message
     }));
 
-    if (this.dom) {
-        this.dom.classList.add("fail");
-        this.dom.summary.icon.classList.remove(this.unitIcon());
-        this.dom.summary.icon.classList.add("fa-times-circle");
-    }
+    if (this.dom)
+       this.dom.classList.add("fail");
 
 }
 
@@ -796,18 +803,11 @@ TestPanel.prototype.unitIcon = function() {
 
 }
 
-TestPanel.prototype.icon = function() {
-    if (this.failed)
-        return "fa-times-circle";
-    else
-        return this.unitIcon();
-}
-
 TestPanel.prototype.createDOM = function() {
 
     this.dom = dd("div.control.test-panel", {
         summary: dd("div.unit-summary", {
-            icon: `span.test-icon.fa.fa-fw.${this.icon()}`,
+            icon: `span.test-icon.fa.fa-fw.${this.unitIcon()}`,
             name: dd("span.unit-name.test-name", this.testName),
             duration: "span.test-duration"
         })
@@ -1021,8 +1021,8 @@ extend(ReporterPanel, InfoPanel);
 InfoPanel.prototype.createDOM = function() {
     
     this.dom = dd("div.control.info-panel", {
-        icon: "span.fa.fa-info-circle.info-icon",
-        message: dd("span", this.message)
+        icon: "div.fa.fa-info-circle.info-icon",
+        message: dd("pre.info-panel-text", this.message)
     });
 
 }
@@ -1034,6 +1034,7 @@ var SummaryPanel = function(options) {
     Control.call(this, options);
 
     this.container = dd("div.control.summary-panel", {
+        setupFailure: dd("div.setup-failure", "!"),
         failCount: dd("div.run-test-count.fail", "0"),
         passCount: dd("div.run-test-count.pass", "0"),
         duration: dd("div.run-duration.run-spinner", "")

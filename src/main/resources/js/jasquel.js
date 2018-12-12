@@ -11,6 +11,13 @@ function checkAborted() {
 
 }
 
+function checkSkip() {
+
+    if (script.skip())
+        throw "Skipped due to setup/teardown failure!"
+
+}
+
 function suite(description, body) {
     
     checkAborted();
@@ -18,9 +25,8 @@ function suite(description, body) {
     script.suiteStart(description, new Error());
     
     try {
-        
+
         body(); 
-        
         script.success(null);
         
     } catch(error) {
@@ -37,9 +43,9 @@ function testf(description, body) {
     script.testStart(description, new Error());
     
     try {
-        
+
+        checkSkip();
         body();
-        
         script.success(null);
         
     } catch(error) {
@@ -69,7 +75,8 @@ function setup(description, body) {
     script.setupStart(description, new Error());
     
     try {
-        
+
+        checkSkip();
         body();
         script.success(null);
         
@@ -78,7 +85,7 @@ function setup(description, body) {
         script.error(error);
         checkAborted();
 
-        throw "Setup has failed!";
+        //throw "Setup has failed!";
         
     }
     
@@ -91,7 +98,8 @@ function teardown(description, body) {
     script.teardownStart(description, new Error());
     
     try {
-        
+
+        checkSkip();
         body();
         script.success(null);
         
@@ -100,7 +108,7 @@ function teardown(description, body) {
         script.error(error);
         checkAborted();
 
-        throw "Teardown has failed!";
+        //throw "Teardown has failed!";
         
     }
     
