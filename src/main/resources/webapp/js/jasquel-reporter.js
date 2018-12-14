@@ -90,6 +90,12 @@ Reporter.prototype.createLayout = function() {
         caption: "Tests"
     }));
 
+    this.displaySteps = this.toolbar.add(new ToggleButton({
+        align: "left",
+        icon: "fa fa-circle-o step-icon",
+        caption: "Steps"
+    }));
+
     this.displayCalls = this.toolbar.add(new ToggleButton({
         align: "left",
         icon: "fa fa-database",
@@ -97,7 +103,7 @@ Reporter.prototype.createLayout = function() {
     }));
 
     this.toggleDisplay = new ToggleGroup(
-        [this.displayScripts, this.displaySuites, this.displayTests, this.displayCalls],
+        [this.displayScripts, this.displaySuites, this.displayTests, this.displaySteps, this.displayCalls],
         this.active ? this.displayTests : this.displayScripts
     );
     
@@ -109,6 +115,8 @@ Reporter.prototype.createLayout = function() {
             this.display("tests");
         else if (this.toggleDisplay.on == this.displaySuites)
             this.display("suites");
+        else if (this.toggleDisplay.on == this.displaySteps)
+            this.display("steps");
         else
             this.display("calls");
 
@@ -202,11 +210,15 @@ Reporter.prototype.displayControl = function(control, what) {
 
         this.reporterLayout.collapse(control, true);
 
-    else if (what == "suites" && (control instanceof SuitePanel || control instanceof TestPanel || control instanceof CallPanel))
+    else if (what == "suites" && (control instanceof SuitePanel || control instanceof TestPanel || control instanceof StepPanel || control instanceof CallPanel))
 
         this.reporterLayout.collapse(control, true);
 
-    else if (what == "tests" && (control instanceof TestPanel || control instanceof CallPanel))
+    else if (what == "tests" && (control instanceof TestPanel || control instanceof StepPanel || control instanceof CallPanel))
+
+        this.reporterLayout.collapse(control, true);
+
+    else if (what == "steps" && (control instanceof StepPanel || control instanceof CallPanel))
 
         this.reporterLayout.collapse(control, true);
 
@@ -269,28 +281,47 @@ Reporter.prototype.runStart = function(data) {
 
 Reporter.prototype.unitStart = function(data) {
 
+    console.log(JSON.stringify(data));
+
     var control;
     var parentUnit = this.unitStack.peek();
 
     if (data.unit.type == "Script") {
 
         control = parentUnit.control.add(new ScriptPanel({
-            collapsed: this.toggleDisplay.on == this.displayScripts,
+            collapsed:
+                this.toggleDisplay.on == this.displayScripts,
             scriptName: data.unit.name
         }));
 
     } else if (data.unit.type == "Suite") {
 
         control = parentUnit.control.add(new SuitePanel({
-            collapsed: this.toggleDisplay.on == this.displayScripts || this.toggleDisplay.on == this.displaySuites,
+            collapsed:
+                this.toggleDisplay.on == this.displayScripts
+                || this.toggleDisplay.on == this.displaySuites,
             suiteName: data.unit.name
         }));
 
     } else if (data.unit.type == "Test" || data.unit.type == "Setup" || data.unit.type == "Teardown") {
 
         control = parentUnit.control.add(new TestPanel({
-            collapsed: this.toggleDisplay.on == this.displayScripts || this.toggleDisplay.on == this.displaySuites || this.toggleDisplay.on == this.displayTests,
+            collapsed:
+                this.toggleDisplay.on == this.displayScripts
+                || this.toggleDisplay.on == this.displaySuites
+                || this.toggleDisplay.on == this.displayTests,
             testType: data.unit.type,
+            testName: data.unit.name
+        }));
+
+    } else if (data.unit.type == "Step") {
+
+        control = parentUnit.control.add(new StepPanel({
+            collapsed:
+                this.toggleDisplay.on == this.displayScripts
+                || this.toggleDisplay.on == this.displaySuites
+                || this.toggleDisplay.on == this.displayTests
+                || this.toggleDisplay.on == this.displaySteps,
             testName: data.unit.name
         }));
 
@@ -357,9 +388,7 @@ Reporter.prototype.error = function(data) {
             let control = this.unitStack[i].control;
             control.setSetupFailure(true);
         }
-
-    else if (unit.type == "Run") 
-
+    else if (unit.type == "Run")
         this.onrunend();
 
 }
@@ -824,6 +853,51 @@ TestPanel.prototype.createDOM = function() {
         this.dom.summary.duration.classList.add("test-spinner");
 
 }
+
+/* Step panel */
+
+var StepPanel = function(options) {
+    ReporterPanel.call(this, options);
+};
+
+extend(ReporterPanel, StepPanel);
+
+StepPanel.prototype.fail = function(message) {
+
+};
+
+StepPanel.prototype.setDuration = function(duration) {
+
+    this.duration = new Duration(duration);
+
+    if (this.dom) {
+        this.dom.summary.duration.classList.remove("test-spinner");
+        this.dom.summary.duration.innerHTML = this.duration.toMinuteTime();
+    }
+
+};
+
+StepPanel.prototype.createDOM = function() {
+
+    this.dom = dd("div.control.step-panel", {
+        summary: dd("div.unit-summary", {
+            icon: `span.step-icon.fa.fa-fw.fa-circle-o`,
+            name: dd("span.unit-name.step-name", this.testName),
+            duration: "span.step-duration"
+        })
+    });
+
+    if (this.failed)
+        this.dom.classList.add("fail");
+
+    this.dom.summary.on("click", toggleCollapsed.bind(this));
+
+    if (this.duration)
+        this.dom.summary.duration.innerHTML = this.duration.toMinuteTime();
+    else
+        this.dom.summary.duration.classList.add("test-spinner");
+
+};
 
 /* ErrorPanel ------------------------------------------------------------------- */
 

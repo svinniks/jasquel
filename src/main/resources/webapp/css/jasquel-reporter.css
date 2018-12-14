@@ -124,7 +124,7 @@
 
 .suite-panel {
     margin-left: 28px;
-    margin-top: 4px;
+    margin-top: 2px;
     padding-left: 4px;
 }
 
@@ -189,25 +189,15 @@
 
 .test-panel {
     margin-left: 24px;
-    padding: 2px 8px 4px 10px;
-    background-color: #f0f8eb;
-    border-top: solid 1px #aaccaa;
+    margin-top: 2px;
+    padding: 2px 8px 3px 10px;
+    background-color: #e8f0e4;
+    color: #006600;
 }
 
 .test-panel.fail {
     background-color: #ffd0d0;
-    border-top: solid 1px #dd8888;
-}
-
-.test-panel.fail+.test-panel {
-    border-top: solid 1px #dd8888;
-}
-
-.unit-summary+.test-panel,
-.suite-panel+.test-panel {
-    margin-top: 8px;
-    border-top-width: 0px;
-    padding-top: 4px;
+    color: #880000;
 }
 
 .test-icon {
@@ -215,11 +205,11 @@
 }
 
 .test-panel>.unit-summary {
-    color: #006600;
+
 }
 
 .test-panel.fail>.unit-summary {
-    color: #880000;   
+
 }
 
 .test-name {
@@ -240,6 +230,44 @@
     margin-right: 2px;
 }
 
+/* StepPanel ------------------------------------------------ */
+
+.step-panel {
+    margin: 0px -2px 0px 14px;
+    padding: 3px 2px 4px 4px;
+    background-color: inherit;
+    color: inherit;
+    font-style: italic;
+}
+
+.step-panel+.step-panel {
+    border-top: solid 1px #aabdaa;
+    margin-top: 0px;
+}
+
+.step-icon {
+    font-size: 8px;
+}
+
+.test-panel.fail .step-panel{
+    border-top-color: #dd8888;
+}
+
+.step-name {
+    margin-left: 8px;
+}
+
+.step-duration {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 8px;
+    visibility: hidden;
+}
+
+.step-panel:hover .step-duration{
+    visibility: visible;
+}
+
 /* ErrorPanel -------------------------------------------------- */
 
 .suite-panel>.error-panel,
@@ -253,10 +281,14 @@
 
 .test-panel>.error-panel {
     background-color: #ffffff;
-    margin: 6px -2px 2px -4px;
+    margin: 4px -2px 2px -4px;
     padding: 4px 6px;
     color: #880000;
     font-weight: bold;
+}
+
+.step-panel+.error-panel {
+    margin-top: 1px
 }
 
 /* CallPanel -------------------------------------------------------- */
@@ -265,14 +297,12 @@
     padding: 4px;
     background-color: #ffffff;
     font-family: monospace;
+    font-style: normal;
+    color: black;
 }
 
 .call-panel:nth-child(2) {
     margin-top: 4px;
-}
-
-.call-panel:last-child {
-    margin-bottom: 2px;
 }
 
 .call-method {

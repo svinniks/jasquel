@@ -108,10 +108,28 @@ function teardown(description, body) {
         script.error(error);
         checkAborted();
 
-        //throw "Teardown has failed!";
-        
     }
     
+};
+
+function step(description, body) {
+
+    checkAborted();
+
+    script.stepStart(description, new Error());
+
+    try {
+
+        body();
+        script.success(null);
+
+    } catch(error) {
+
+        script.error(error);
+        throw error;
+
+    }
+
 };
 
 function info(message) {
