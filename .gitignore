@@ -8,5 +8,5 @@ target/
 project.json
 before.js
 lib/
-run/
+/run/
 test/
