@@ -44,7 +44,7 @@ var Jasquel = function(options) {
     /* Create a header. */
     this.header = this.add(new Div({
         align: "top",
-        height: "48px",
+        height: "42px",
         classes: ["header"]
     }));
     

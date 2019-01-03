@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.logging.Level;
+
+import static jasquel.common.Log.LOGGER;
 
 /**
  *
@@ -89,7 +92,7 @@ public class HttpClient {
     public Response post(String url, Map<String, String> headers) throws IOException {
         return post(url, headers, null);
     }
-    
+
     public Response put(String url, Map<String, String> headers, HttpEntity content) throws IOException {
         
         HttpPut request = new HttpPut(url);
@@ -114,6 +117,16 @@ public class HttpClient {
     
     public Response delete(String url, Map<String, String> headers) throws IOException {
         return delete(url, headers, null);
+    }
+
+    public Runnable deleteTask(String url, Map<String, String> headers, HttpEntity content) {
+        return () -> {
+            try {
+                delete(url, headers, content);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, "An error occurred while executing HTTP DELETE task.", ex);
+            }
+        };
     }
     
 }

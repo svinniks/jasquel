@@ -1,9 +1,10 @@
+/* Common --------------------------------------------------- */
 .fail.fa-fw {
     width: 1em;
 }
 
 .detail-panel {
-    padding: 8px;
+    padding: 4px;
 }
 
 .unit-name {
@@ -83,7 +84,7 @@
 }
 
 .script-test-count.pass {
-    background-color: #f0f8eb;
+    background-color: #e6eee2;
     color: #006600;
 }
 
@@ -195,6 +196,10 @@
     color: #006600;
 }
 
+.test-panel:nth-child(2) {
+    margin-top: 4px;
+}
+
 .test-panel.fail {
     background-color: #ffd0d0;
     color: #880000;
@@ -202,14 +207,6 @@
 
 .test-icon {
     font-size: 12px;
-}
-
-.test-panel>.unit-summary {
-
-}
-
-.test-panel.fail>.unit-summary {
-
 }
 
 .test-name {
@@ -266,11 +263,6 @@
     flex-grow: 0;
     flex-shrink: 0;
     margin-left: 8px;
-    visibility: hidden;
-}
-
-.step-panel:hover .step-duration{
-    visibility: visible;
 }
 
 /* ErrorPanel -------------------------------------------------- */
@@ -398,10 +390,15 @@
 .info-icon {
     width: 19px;
     font-size: 75%;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .info-panel-text {
     margin: 0px;
+    flex-grow: 0;
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .script-panel .info-panel, 
@@ -413,10 +410,6 @@
 .test-panel .info-panel {
     margin: 1px -2px 0px -4px;
     padding-left: 31px;
-}
-
-.test-panel+.info-panel {
-    border-top: solid 1px #aaccaa;
 }
 
 .test-panel .info-panel:nth-child(2) {
@@ -453,7 +446,7 @@
 }
 
 .run-test-count.pass {
-    background-color: #f0f8eb;
+    background-color: #e6eee2;
     color: #006600;
 }
 
@@ -464,20 +457,15 @@
 }
 
 .setup-failure {
-    background-color: #ffd0d0;
     color: #880000;
-    font-weight: bold;
-    border-radius: 4px;
-    margin-left: 8px;
     flex-shrink: 0;
     flex-grow: 0;
-    padding: 2px 6px;
     display: none;
 }
 
 .run-duration {
     min-width: 76px;
-    margin-right: 42px;
+    margin-right: 38px;
     text-align: end;
 }
 

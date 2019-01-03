@@ -211,11 +211,14 @@
 /* Toolbar ------------------------------------------- */
 
 .toolbar {
-    padding: 2px;
     /* Default visual attributes */
+    padding: 2px;
     border: dashed 1px #aaaaaa;
     background-color: #eeeeee;
-    padding: 2px;
+}
+
+.toolbar.embedded {
+    padding: 0px;
 }
 
 /* Splitter is a vertical line in the toolbar */

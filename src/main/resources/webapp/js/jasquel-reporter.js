@@ -44,7 +44,11 @@ extend(Div, Reporter);
 Reporter.prototype.createLayout = function() {
 
     this.toolPanel = this.add(new Div({
-        align: "top"
+        align: "top",
+        classes: ["tool-panel"],
+        layoutManager: new DockLayout({
+            gap: "6px"
+        })
     }));
 
     this.toolbar = this.toolPanel.add(new Toolbar({
@@ -122,9 +126,10 @@ Reporter.prototype.createLayout = function() {
 
     }.bind(this);
 
-    this.toolbar.add(new Splitter({
-        align: "left"
-    }));
+    if (!this.shared || this.active)
+        this.toolbar.add(new Splitter({
+            align: "left"
+        }));
 
     if (!this.shared)
         this.clearButton = this.toolbar.add(new Button({
@@ -280,8 +285,6 @@ Reporter.prototype.runStart = function(data) {
 }
 
 Reporter.prototype.unitStart = function(data) {
-
-    console.log(JSON.stringify(data));
 
     var control;
     var parentUnit = this.unitStack.peek();
@@ -661,7 +664,7 @@ ScriptPanel.prototype.createDOM = function() {
                 icon: `span.fa.fa-fw.fa-file-text`,
                 name: dd("div.script-name", this.scriptName),
                 failures: dd("div.script-failures", {
-                    setupFailure: dd("span.setup-failure", "!"),
+                    setupFailure: dd("div.fa.fa-fw.fa-cog.setup-failure"),
                     fail: dd("span.script-test-count.fail", this.failCount)
                 }),
                 pass: dd("span.script-test-count.pass", this.passCount),
@@ -763,7 +766,7 @@ SuitePanel.prototype.createDOM = function() {
             icon: `span.fa.fa-fw.fa-folder-o`,
             name: dd("span.unit-name.suite-name", this.suiteName),
             failures: dd("div.script-failures", {
-                setupFailure: dd("span.suite-setup-failure", "!"),
+                setupFailure: dd("div.fa.fa-fw.fa-cog.setup-failure"),
                 fail: dd("span.suite-test-count.fail", this.failCount)
             }),
             pass: dd("span.suite-test-count.pass", this.passCount),
@@ -1108,7 +1111,7 @@ var SummaryPanel = function(options) {
     Control.call(this, options);
 
     this.container = dd("div.control.summary-panel", {
-        setupFailure: dd("div.setup-failure", "!"),
+        setupFailure: dd("div.fa.fa-fw.fa-cog.setup-failure"),
         failCount: dd("div.run-test-count.fail", "0"),
         passCount: dd("div.run-test-count.pass", "0"),
         duration: dd("div.run-duration.run-spinner", "")

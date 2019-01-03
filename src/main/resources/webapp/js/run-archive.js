@@ -268,7 +268,7 @@ RunPanel.prototype.createDOM = function() {
             icon: "span.fa.fa-fw.fa-play-circle-o",
             name: dd("span.run-name.run-archive-title", this.title),
             failures: dd("div.script-failures", {
-                setupFailure: dd("span.setup-failure", "!"),
+                setupFailure: dd("div.fa.fa-fw.fa-cog.setup-failure"),
                 failCount: dd("div.run-test-count.fail", this.run.summary.failCount)
             }),
             passCount: dd("div.run-test-count.pass", this.run.summary.passCount),
