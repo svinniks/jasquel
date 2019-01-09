@@ -25,7 +25,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 
+import static jasquel.common.Log.LOGGER;
 import static jasquel.common.StringUtil.nvl;
+import static java.util.logging.Level.SEVERE;
 import static javax.script.ScriptContext.ENGINE_SCOPE;
 
 /**
@@ -327,7 +329,7 @@ public class ScriptRun {
 
         if (remoteAbortHandler != null)
             remoteAbortHandler.run();
-        
+
     }
 
     public boolean isAborted() {

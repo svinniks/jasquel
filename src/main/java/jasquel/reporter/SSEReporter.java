@@ -66,7 +66,7 @@ public class SSEReporter extends Reporter {
 
             if (writer.checkError())
                 throw new ReporterException();
-            
+
         }
         
     }

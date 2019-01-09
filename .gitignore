@@ -7,6 +7,6 @@ target/
 
 project.json
 before.js
-lib/
+lib-ext/
 /run/
 test/

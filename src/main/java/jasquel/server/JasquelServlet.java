@@ -350,8 +350,9 @@ public class JasquelServlet extends HttpServlet {
             1
         );
 
-        CompletableFuture
-            .runAsync(watcher::start);
+        new Thread(() -> {
+            watcher.start();
+        }).start();
 
         response.setContentType("application/json");
         response.setStatus(SC_OK);
@@ -399,9 +400,10 @@ public class JasquelServlet extends HttpServlet {
             FileRunner.findScripts(jasquel.getTestDirectory(), runRequest.paths)
         );
 
-        CompletableFuture
-            .runAsync(runner::start)
-            .thenRun(() -> runManager.finishRun(run));
+        new Thread(() -> {
+            runner.start();
+            runManager.finishRun(run);
+        }).start();
 
         response.setContentType("application/json");
         response.setStatus(SC_OK);

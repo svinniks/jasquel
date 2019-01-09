@@ -9,10 +9,13 @@ import static jasquel.common.Log.log;
 import jasquel.run.action.RunAction;
 import jasquel.run.action.RunScriptAction;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import jdk.nashorn.internal.objects.Global;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 import static java.util.logging.Level.FINER;
+import static javax.script.ScriptContext.ENGINE_SCOPE;
+
 import javax.script.ScriptEngine;
 import javax.script.SimpleScriptContext;
 
@@ -72,9 +75,9 @@ public class EngineThread extends Thread {
             
                 currentScriptRun = ((RunScriptAction)(action)).scriptRun;
 
-                engine.setContext(new SimpleScriptContext());
-                currentScriptRun.start(engine);
+                engine.setBindings(engine.createBindings(), ENGINE_SCOPE);
 
+                currentScriptRun.start(engine);
                 currentScriptRun = null;
                 
             }
@@ -88,14 +91,14 @@ public class EngineThread extends Thread {
     }
     
     public void abort() {
-        
+
+        interrupt();
+
         ScriptRun scriptRun = currentScriptRun;
         
         if (scriptRun != null)
             scriptRun.abort();
-        
-        interrupt();
-        
+
     }
     
 }
