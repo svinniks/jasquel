@@ -38,16 +38,22 @@ public class RunManager {
         runOutputFiles = new HashMap<>();
     }
 
-    private synchronized File createSharedRunFile(String description) throws IOException {
+    private synchronized File createSharedRunFile(String description, LocalDateTime runDateTimeOverride) throws IOException {
 
         if (description == null)
             description = "";
         else if (description.length() > 0)
             description = "-" + description.toLowerCase().replaceAll("[^a-z0-9-_\\.]", "_");
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime runDateTime;
 
-        String baseName = now.format(
+        if(runDateTimeOverride != null) {
+            runDateTime = runDateTimeOverride;
+        } else {
+            runDateTime = LocalDateTime.now();
+        }
+
+        String baseName = runDateTime.format(
                 DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss")
         ) + "%s%s.run";
 
@@ -68,13 +74,13 @@ public class RunManager {
 
     }
 
-    public ActiveRun startRun(boolean shared, String environment, String description) throws IOException {
+    public ActiveRun startRun(boolean shared, String environment, String description, LocalDateTime runDateTimeOverride) throws IOException {
 
         String id;
         File file = null;
 
         if (shared) {
-            file = createSharedRunFile(description);
+            file = createSharedRunFile(description, runDateTimeOverride);
             id = FilenameUtils.removeExtension(file.getName());
         } else
             id = UUID.randomUUID().toString();
@@ -95,7 +101,7 @@ public class RunManager {
     }
 
     public ActiveRun startRun(String environment) throws IOException {
-        return startRun(false, environment, null);
+        return startRun(false, environment, null, null);
     }
 
     public void finishRun(ActiveRun run) {
