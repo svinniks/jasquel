@@ -5,6 +5,7 @@
  */
 package jasquel.server;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,5 +19,6 @@ public class RunRequest {
     public int threads;
     public List<String> paths;
     boolean shared;
+    LocalDateTime runDateTimeOverride;
     
 }
